@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    
+    --bg-base: #08090b;
+    --bg-surface: #0e1015;
+    --bg-elevated: #13161d;
+    --border-hairline: #1b1e28;
+    --border-active: #2b3040;
+    
+    --accent-blue: #0052ff;
+    --accent-emerald: #00d68f;
+    --accent-amber: #ff9900;
+    --accent-crimson: #ff3344;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    color: #e1e4ea;
+    overflow-x: hidden;
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Custom Tactical Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #090a0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #1b1e28;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2b3040;
+}
+
+/* Swiss Hairline Grid Utilities */
+.hairline-border {
+  border: 1px solid #1c202a;
+}
+.hairline-b {
+  border-bottom: 1px solid #1c202a;
+}
+.hairline-r {
+  border-right: 1px solid #1c202a;
+}
+.hairline-t {
+  border-top: 1px solid #1c202a;
+}
+.hairline-l {
+  border-left: 1px solid #1c202a;
+}
+
+/* Subtle cryptographic grid backdrop (non-slop, clean architectural drafting grid) */
+.architectural-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* Pulsing terminal cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.terminal-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background-color: #00d68f;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 3px;
+}
