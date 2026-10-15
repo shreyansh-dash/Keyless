@@ -157,7 +157,7 @@
           {:else if !kioskAuthSuccess}
             <div class="p-3 bg-[#131720] hairline-border text-[#56bbf5] font-mono text-xs flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 border-2 border-[#56bbf5]/30 border-t-[#56bbf5] animate-spin"></span>
+                <span class="w-3.5 h-3.5 border-2 border-[#1b2b3a] border-t-[#56bbf5] animate-spin"></span>
                 <span>PROMPT POPPED UP ON PHONE...</span>
               </div>
               <span class="text-[10px] text-[#8e98aa]">Touch fingerprint on phone now</span>

@@ -4,11 +4,29 @@ import { generateChallenge, sha256, createSyntheticAuthData, bufferToHex, buffer
 class SwissAuthStore {
   activeTab = $state<ViewTab>('AUTH');
   
+  // Registered User Profiles
+  registeredUsers = $state([
+    {
+      nationalId: 'IN-AADHAAR-8921-9941',
+      name: 'Kunal Sharma',
+      service: 'National Digital Identity Grid (DigiLocker)',
+      riskScore: 'LOW (0.04)',
+      ipAddress: '103.24.112.44 (New Delhi, IN)',
+    },
+    {
+      nationalId: 'IN-AADHAAR-3104-5829',
+      name: 'Priya Patel',
+      service: 'Direct Benefit Transfer (DBT)',
+      riskScore: 'LOW (0.01)',
+      ipAddress: '115.112.24.8 (Ahmedabad, IN)',
+    }
+  ]);
+
   // User Profile
   user = $state({
     nationalId: 'IN-AADHAAR-8921-9941',
     name: 'Kunal Sharma',
-    service: 'National Digital Identity Grid (NDIG / DigiLocker)',
+    service: 'National Digital Identity Grid (DigiLocker)',
     riskScore: 'LOW (0.04)',
     ipAddress: '103.24.112.44 (New Delhi, IN)',
   });
@@ -273,10 +291,94 @@ class SwissAuthStore {
     this.authStage = 'AUTHENTICATED';
     this.authSuccess = true;
 
-    this.addLog('AUTH_SUCCESS', 'OK', `IDENTITY ATTESTED: Kunal Sharma authenticated via Apple Secure Enclave in ${this.lastLatencyMs}ms`, {
+    this.addLog('AUTH_SUCCESS', 'OK', `IDENTITY ATTESTED: ${this.user.name} authenticated via ${this.devices[0].deviceModel} in ${this.lastLatencyMs}ms`, {
       assuranceLevel: 'NIST AAL3 / FIDO2 Level 3',
       sessionExpiry: '15m (Zero-Trust Refresh)',
       tokenBinding: 'Channel-Bound & Origin-Locked',
+    }, 'success');
+  }
+
+  logout() {
+    this.authSuccess = false;
+    this.authStage = 'IDLE';
+    this.addLog('LOGOUT', 'INIT', `Session terminated for ${this.user.name}. Ready for next authentication.`, null, 'info');
+  }
+
+  selectAccount(nationalId: string) {
+    const found = this.registeredUsers.find(u => u.nationalId === nationalId);
+    if (found) {
+      this.user = { ...found };
+    }
+  }
+
+  async triggerRegistration(formData: { name: string; nationalId: string; service: string; deviceModel: string; transport: 'internal' | 'usb' | 'nfc' | 'hybrid' }) {
+    const startTime = performance.now();
+    this.authSuccess = false;
+    this.authStage = 'CHALLENGE_ISSUED';
+
+    const challenge = generateChallenge(32);
+    this.currentChallenge = challenge;
+    this.addLog('REG_CHALLENGE', 'ENTROPY', `Issued WebAuthn registration nonce for citizen [${formData.name}]`, {
+      challengeHex: challenge.hex,
+      rpId: 'id.digilocker.gov.in',
+      service: formData.service,
+    }, 'info');
+
+    await new Promise(r => setTimeout(r, 280));
+    this.authStage = 'PROMPTING_AUTHENTICATOR';
+
+    await new Promise(r => setTimeout(r, 380));
+    this.authStage = 'COLLECTING_CLIENT_DATA';
+
+    const newCredId = `cred-${Date.now().toString(36)}`;
+    const randomAaguid = `${Math.random().toString(16).substring(2, 10)}-${Math.random().toString(16).substring(2, 6)}-4a81-b6e1-${Math.random().toString(16).substring(2, 14)}`;
+    const randomPubKey = '3059301306072a8648ce3d020106082a8648ce3d03010703420004' + bufferToHex(generateChallenge(32).raw);
+
+    const newDevice: CredentialDevice = {
+      id: newCredId,
+      credentialIdBase64: bufferToBase64URL(generateChallenge(16).raw),
+      publicKeyHex: randomPubKey,
+      deviceModel: formData.deviceModel,
+      aaguid: randomAaguid,
+      algorithm: 'ES256 (P-256 ECDSA)',
+      counter: 1,
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      lastUsedAt: 'Just now',
+      transports: [formData.transport],
+      userVerified: true,
+      userPresent: true,
+      revoked: false,
+      trustLevel: formData.transport === 'internal' ? 'ENCLAVE_TIER_1' : 'ROAMING_FIDO2',
+    };
+
+    this.devices = [newDevice, ...this.devices];
+
+    const newUser = {
+      nationalId: formData.nationalId,
+      name: formData.name,
+      service: formData.service,
+      riskScore: 'LOW (0.01)',
+      ipAddress: '103.24.112.44 (New Delhi, IN)',
+    };
+
+    if (!this.registeredUsers.find(u => u.nationalId === formData.nationalId)) {
+      this.registeredUsers = [newUser, ...this.registeredUsers];
+    }
+    this.user = newUser;
+
+    await new Promise(r => setTimeout(r, 260));
+    this.authStage = 'VERIFYING_SIGNATURE';
+
+    await new Promise(r => setTimeout(r, 200));
+    this.lastLatencyMs = Math.round(performance.now() - startTime);
+    this.authStage = 'AUTHENTICATED';
+    this.authSuccess = true;
+
+    this.addLog('REG_COMPLETE', 'OK', `New passkey enrolled & citizen account created for ${formData.name}`, {
+      credentialId: newDevice.credentialIdBase64,
+      deviceModel: newDevice.deviceModel,
+      publicKeyP256: newDevice.publicKeyHex.substring(0, 32) + '...',
+      assuranceLevel: 'NIST AAL3',
     }, 'success');
   }
 

@@ -65,7 +65,7 @@
   <!-- Device Inventory Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
     {#each store.devices as device (device.id)}
-      <div class="bg-[#0c0e14] hairline-border p-5 flex flex-col justify-between space-y-5 {device.revoked ? 'opacity-60 bg-[#120f12]' : ''}">
+      <div class="bg-[#0c0e14] hairline-border p-5 flex flex-col justify-between space-y-5 {device.revoked ? 'bg-[#120f12]' : ''}">
         
         <div>
           <!-- Card Header & Status -->
@@ -198,7 +198,7 @@
 
 <!-- Modal for Enrolling New Device -->
 {#if showEnrollModal}
-  <div class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-[#06070a] z-50 flex items-center justify-center p-4">
     <div class="bg-[#0e1117] hairline-border max-w-md w-full p-6 font-mono text-xs shadow-2xl space-y-5">
       <div class="flex items-center justify-between hairline-b pb-3">
         <h3 class="font-bold text-white uppercase text-sm">Add a New Device or Key</h3>

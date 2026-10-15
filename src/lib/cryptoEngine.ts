@@ -45,7 +45,7 @@ export function generateChallenge(bytesCount = 32): { raw: Uint8Array; base64url
 // SHA-256 via WebCrypto SubtleCrypto
 export async function sha256(input: string | Uint8Array): Promise<{ hex: string; raw: Uint8Array }> {
   const data = typeof input === 'string' ? new TextEncoder().encode(input) : input;
-  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data as BufferSource);
   const raw = new Uint8Array(hashBuffer);
   return {
     hex: bufferToHex(raw),
@@ -130,7 +130,7 @@ export async function signWithKey(privateKey: CryptoKey, data: Uint8Array): Prom
       hash: { name: 'SHA-256' },
     },
     privateKey,
-    data
+    data as BufferSource
   );
   return new Uint8Array(signature);
 }

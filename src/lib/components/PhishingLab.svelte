@@ -30,7 +30,7 @@
         class="px-5 py-3 bg-[#ff3344] hover:bg-[#e02535] active:bg-[#c71e2c] text-white font-mono text-xs font-bold uppercase tracking-wider hairline-border flex items-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer"
       >
         {#if store.phishingSim.running}
-          <span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white animate-spin"></span>
+          <span class="w-3.5 h-3.5 border-2 border-[#4a1c22] border-t-white animate-spin"></span>
           <span>TESTING FAKE WEBSITE ATTACK...</span>
         {:else}
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@
               <span>✕ ATTACK BLOCKED: FAKE WEBSITE REJECTED</span>
             </div>
             <div class="text-[11px] text-[#ff99a6]">
-              A scammer tried to replay a login captured from <code class="bg-black/40 px-1 text-white">"id.digil0cker-gov.in"</code>. 
+              A scammer tried to replay a login captured from <code class="bg-[#06070a] px-1 text-white">"id.digil0cker-gov.in"</code>. 
               The official site rejected it immediately because the website address didn't match. 
               <strong>Your account is 100% safe.</strong>
             </div>

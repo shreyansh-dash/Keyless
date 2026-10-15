@@ -147,7 +147,7 @@
 
 <!-- Modal Drawer for Deep Inspection if log clicked -->
 {#if selectedLog}
-  <div class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-[#06070a] z-50 flex items-center justify-center p-4">
     <div class="bg-[#0e1117] hairline-border max-w-2xl w-full p-4 font-mono text-[12px] shadow-2xl">
       <div class="flex items-center justify-between hairline-b pb-2 mb-3">
         <div class="flex items-center gap-2">

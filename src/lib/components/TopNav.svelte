@@ -29,7 +29,7 @@
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-1.5">
         <span class="text-[#555d6e]">SECURITY LEVEL:</span>
-        <span class="text-[#00d68f] bg-[#00d68f]/10 px-1.5 py-0.5 font-medium">BANK GRADE (AAL3)</span>
+        <span class="text-[#00d68f] bg-[#002b1c] px-1.5 py-0.5 font-medium">BANK GRADE (AAL3)</span>
       </div>
       <div class="flex items-center gap-1.5">
         <span class="text-[#555d6e]">OFFICIAL SITE:</span>
