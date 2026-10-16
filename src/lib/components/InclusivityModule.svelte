@@ -1,31 +1,48 @@
 <script lang="ts">
   import { store } from '../store.svelte';
+  import { api } from '../api';
 
   let activeInclusivityMode = $state<'KIOSK_QR' | 'VOICE_ASSIST'>('KIOSK_QR');
   let kioskQrScanned = $state(false);
   let kioskAuthSuccess = $state(false);
   let speechSpeaking = $state(false);
 
-  function simulatePhoneScan() {
+  async function simulatePhoneScan() {
     kioskQrScanned = true;
-    store.addLog('HYBRID_QR_SCANNED', 'CLIENT_DATA', `Public village kiosk paired with trusted phone.`, {
-      kioskId: store.kioskSessionId,
-      connectedVia: 'Bluetooth / QR Code Scan',
-      operatorPhone: 'Village Level Entrepreneur (VLE) Certified Tablet',
-    }, 'info');
 
-    setTimeout(() => {
+    if (store.backendOnline) {
+      try {
+        await api.scanKioskSession(store.kioskSessionId);
+      } catch (e) {}
+    } else {
+      store.addLog('HYBRID_QR_SCANNED', 'CLIENT_DATA', `Public village kiosk paired with trusted phone.`, {
+        kioskId: store.kioskSessionId,
+        connectedVia: 'Bluetooth / QR Code Scan',
+        operatorPhone: 'Village Level Entrepreneur (VLE) Certified Tablet',
+      }, 'info');
+    }
+
+    setTimeout(async () => {
       kioskAuthSuccess = true;
-      store.addLog('KIOSK_AUTH_CONFIRMED', 'OK', 'Citizen approved login on their phone. Public screen unlocked.', {
-        passwordsTypedOnPublicPC: 'Zero (No keyboard needed)',
-        safetyVerdict: '100% Keylogger-Proof',
-      }, 'success');
+      if (store.backendOnline) {
+        try {
+          await api.authorizeKioskSession(store.kioskSessionId);
+        } catch (e) {}
+      } else {
+        store.addLog('KIOSK_AUTH_CONFIRMED', 'OK', 'Citizen approved login on their phone. Public screen unlocked.', {
+          passwordsTypedOnPublicPC: 'Zero (No keyboard needed)',
+          safetyVerdict: '100% Keylogger-Proof',
+        }, 'success');
+      }
     }, 1200);
   }
 
   function resetKioskDemo() {
     kioskQrScanned = false;
     kioskAuthSuccess = false;
+    if (store.backendOnline) {
+      api.resetKioskSession(store.kioskSessionId).catch(() => {});
+    }
   }
 
   function playVoicePrompt() {
@@ -229,19 +246,37 @@
         <div class="p-5 bg-[#08090d] hairline-border space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div class="text-[10px] font-mono text-[#555d6e] uppercase">Choose Language</div>
-              <div class="flex gap-2 mt-1">
+              <div class="text-[10px] font-mono text-[#555d6e] uppercase">Choose Language (भारत की भाषाएँ)</div>
+              <div class="flex flex-wrap gap-2 mt-1">
+                <button
+                  onclick={() => store.audioLang = 'hi-IN'}
+                  class="px-2.5 py-1 text-xs font-mono hairline-border cursor-pointer {store.audioLang === 'hi-IN' ? 'bg-[#0052ff] text-white font-bold' : 'bg-[#12141c] text-[#8e97a8]'}"
+                >
+                  हिन्दी (Hindi)
+                </button>
                 <button
                   onclick={() => store.audioLang = 'en-IN'}
-                  class="px-3 py-1 text-xs font-mono hairline-border cursor-pointer {store.audioLang === 'en-IN' ? 'bg-[#0052ff] text-white font-bold' : 'bg-[#12141c] text-[#8e97a8]'}"
+                  class="px-2.5 py-1 text-xs font-mono hairline-border cursor-pointer {store.audioLang === 'en-IN' ? 'bg-[#0052ff] text-white font-bold' : 'bg-[#12141c] text-[#8e97a8]'}"
                 >
                   English (India)
                 </button>
                 <button
-                  onclick={() => store.audioLang = 'hi-IN'}
-                  class="px-3 py-1 text-xs font-mono hairline-border cursor-pointer {store.audioLang === 'hi-IN' ? 'bg-[#0052ff] text-white font-bold' : 'bg-[#12141c] text-[#8e97a8]'}"
+                  onclick={() => store.audioLang = 'ta-IN'}
+                  class="px-2.5 py-1 text-xs font-mono hairline-border cursor-pointer {store.audioLang === 'ta-IN' ? 'bg-[#0052ff] text-white font-bold' : 'bg-[#12141c] text-[#8e97a8]'}"
                 >
-                  हिन्दी (Hindi)
+                  தமிழ் (Tamil)
+                </button>
+                <button
+                  onclick={() => store.audioLang = 'bn-IN'}
+                  class="px-2.5 py-1 text-xs font-mono hairline-border cursor-pointer {store.audioLang === 'bn-IN' ? 'bg-[#0052ff] text-white font-bold' : 'bg-[#12141c] text-[#8e97a8]'}"
+                >
+                  বাংলা (Bengali)
+                </button>
+                <button
+                  onclick={() => store.audioLang = 'te-IN'}
+                  class="px-2.5 py-1 text-xs font-mono hairline-border cursor-pointer {store.audioLang === 'te-IN' ? 'bg-[#0052ff] text-white font-bold' : 'bg-[#12141c] text-[#8e97a8]'}"
+                >
+                  తెలుగు (Telugu)
                 </button>
               </div>
             </div>

@@ -135,19 +135,95 @@ export async function signWithKey(privateKey: CryptoKey, data: Uint8Array): Prom
   return new Uint8Array(signature);
 }
 
-// Voice synthesizer for Inclusivity (Speaks in Hindi or English)
-export function speakAcousticChallenge(code: string, lang: 'hi-IN' | 'en-IN' = 'en-IN') {
-  if (!('speechSynthesis' in window)) return;
+// Voice synthesizer for Inclusivity (Speaks in Hindi, English, Tamil, Bengali, Telugu)
+export type SupportedVoiceLang = 'en-IN' | 'hi-IN' | 'ta-IN' | 'bn-IN' | 'te-IN';
+
+export function speakAcousticChallenge(code: string, lang: SupportedVoiceLang = 'en-IN') {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
 
   const formattedCode = code.split('').join(' . ');
-  const promptText = lang === 'hi-IN' 
-    ? `सुरक्षित सत्यापन कोड है: ${formattedCode}. कृपया अपने बायोमेट्रिक सेंसर को स्पर्श करें.`
-    : `Secure identity verification code: ${formattedCode}. Please tap your biometric sensor.`;
+  let promptText = `Secure identity verification code: ${formattedCode}. Please tap your biometric sensor.`;
+
+  if (lang === 'hi-IN') {
+    promptText = `सुरक्षित सत्यापन कोड है: ${formattedCode}. कृपया अपने बायोमेट्रिक सेंसर को स्पर्श करें.`;
+  } else if (lang === 'ta-IN') {
+    promptText = `பாதுகாப்பான சரிபார்ப்புக் குறியீடு: ${formattedCode}. உங்கள் பயோமெட்ரிக் சென்சாரைத் தொடவும்.`;
+  } else if (lang === 'bn-IN') {
+    promptText = `নিরাপদ যাচাইকরণ কোড হলো: ${formattedCode}. অনুগ্রহ করে আপনার বায়ोমেট্রিক সেন্সর স্পর্শ করুন.`;
+  } else if (lang === 'te-IN') {
+    promptText = `సురక్షిత ధృవీకరణ కోడ్: ${formattedCode}. దయచేసి మీ బయోమెట్రిక్ సెన్సార్‌ను తాకండి.`;
+  }
 
   const utterance = new SpeechSynthesisUtterance(promptText);
   utterance.lang = lang;
-  utterance.rate = 0.9;
+  utterance.rate = 0.85;
   utterance.pitch = 1.0;
   window.speechSynthesis.speak(utterance);
+}
+
+export function speakVoiceGuide(text: string, lang: SupportedVoiceLang = 'hi-IN') {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  utterance.rate = 0.9;
+  window.speechSynthesis.speak(utterance);
+}
+
+// Dihedral Group D5 Verhoeff Checksum Algorithm
+const verhoeff_d: number[][] = [
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
+  [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
+  [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
+  [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
+  [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
+  [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
+  [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
+  [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
+  [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+];
+
+const verhoeff_p: number[][] = [
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
+  [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
+  [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
+  [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
+  [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
+  [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
+  [7, 0, 4, 6, 9, 1, 3, 2, 5, 8],
+];
+
+export function validateVerhoeffChecksum(numStr: string): boolean {
+  const digits = numStr.replace(/\D/g, '');
+  if (digits.length < 2) return false;
+  let c = 0;
+  const reversed = digits.split('').map(Number).reverse();
+  for (let i = 0; i < reversed.length; i++) {
+    c = verhoeff_d[c][verhoeff_p[i % 8][reversed[i]]];
+  }
+  return c === 0;
+}
+
+export function validateAadhaarInput(val: string): { valid: boolean; message: string; is12Digit: boolean } {
+  const trimmed = (val || '').trim();
+  if (!trimmed) return { valid: false, message: 'Please enter your Aadhaar number', is12Digit: false };
+  if (trimmed.toUpperCase().startsWith('IN-AADHAAR-')) {
+    return { valid: true, message: 'Valid Sandbox National ID', is12Digit: false };
+  }
+  const digits = trimmed.replace(/\D/g, '');
+  if (digits.length !== 12) {
+    return { valid: false, message: `Aadhaar must be exactly 12 digits (currently ${digits.length})`, is12Digit: false };
+  }
+  if (digits.startsWith('0') || digits.startsWith('1')) {
+    return { valid: false, message: 'Invalid Aadhaar: Cannot start with 0 or 1', is12Digit: true };
+  }
+  const vValid = validateVerhoeffChecksum(digits);
+  return {
+    valid: true,
+    message: vValid ? '✓ Valid 12-Digit Verhoeff Checksum' : '12-Digit Aadhaar format (Mock Sandbox Check)',
+    is12Digit: true,
+  };
 }

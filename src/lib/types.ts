@@ -20,6 +20,7 @@ export interface TelemetryLog {
 
 export interface CredentialDevice {
   id: string;
+  userId?: string;
   credentialIdBase64: string;
   publicKeyHex: string;
   deviceModel: string;

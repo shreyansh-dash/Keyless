@@ -9,14 +9,21 @@
 
 ## Quick Start (How to Run the Application)
 
-Run the local Vite development server:
+Run the full-stack development environment (Relying Party Backend + Vite Frontend):
 ```powershell
 npm.cmd run dev
 ```
-Open your browser and navigate to:
-**[http://localhost:5173/](http://localhost:5173/)**
+
+This runs both systems concurrently in a single terminal:
+- **Relying Party (RP) Backend Server:** [http://localhost:3001/api/health](http://localhost:3001/api/health)
+- **Frontend Passkey Workstation:** [http://localhost:5173/](http://localhost:5173/)
 
 *(Note: On Windows PowerShell, use `npm.cmd` rather than `npm` to adhere to Windows Execution Policies without altering system-level script security).*
+
+### Dedicated Backend Scripts (Optional)
+- Run backend server independently: `npm.cmd run dev:server` or `npm.cmd run server`
+- Run frontend independently: `npm.cmd run dev:client`
+
 
 ---
 

@@ -28,10 +28,24 @@
     
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-1.5">
+        <span class="text-[#555d6e]">RP BACKEND:</span>
+        {#if store.backendOnline}
+          <span class="inline-flex items-center gap-1 text-[#00ff99] bg-[#002b1c] px-1.5 py-0.5 font-medium hairline-border border-[#00663e]">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00ff99] animate-pulse"></span>
+            <span>PORT 3001 ONLINE</span>
+          </span>
+        {:else}
+          <span class="inline-flex items-center gap-1 text-[#ffb84d] bg-[#291e10] px-1.5 py-0.5 font-medium hairline-border border-[#4d361c]">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#ffb84d]"></span>
+            <span>SIMULATOR MODE</span>
+          </span>
+        {/if}
+      </div>
+      <div class="flex items-center gap-1.5">
         <span class="text-[#555d6e]">SECURITY LEVEL:</span>
         <span class="text-[#00d68f] bg-[#002b1c] px-1.5 py-0.5 font-medium">BANK GRADE (AAL3)</span>
       </div>
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1.5 hidden sm:flex">
         <span class="text-[#555d6e]">OFFICIAL SITE:</span>
         <span class="text-[#99a1b3]">id.digilocker.gov.in</span>
       </div>

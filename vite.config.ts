@@ -8,4 +8,18 @@ export default defineConfig({
     tailwindcss(),
     svelte()
   ],
+  server: {
+    port: 5173,
+    watch: {
+      ignored: ['**/server/**', '**/server/data/**', '**/*.json', '**/*.log'],
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 })
+

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { store } from '../store.svelte';
+  import { api } from '../api';
 
   let activeRecoveryTab = $state<'GUARDIAN' | 'ARMOR_KEY'>('GUARDIAN');
   let enteredMnemonic = $state<string[]>(Array(12).fill(''));
@@ -8,13 +9,28 @@
   let attestedCount = $derived(store.guardians.filter(g => g.status === 'ATTESTED').length);
   let thresholdSatisfied = $derived(attestedCount >= 2);
 
-  function verifyPaperKey() {
+  async function verifyPaperKey() {
+    if (store.backendOnline) {
+      try {
+        const res = await api.verifyMnemonic(enteredMnemonic);
+        if (res.success && res.verified) {
+          mnemonicVerificationStatus = 'SUCCESS';
+          return;
+        } else {
+          mnemonicVerificationStatus = 'ERROR';
+          return;
+        }
+      } catch (err) {
+        // Fallback to local check
+      }
+    }
+
     const isMatch = enteredMnemonic.every((w, i) => w.trim().toLowerCase() === store.paperMnemonic[i]);
     if (isMatch) {
       mnemonicVerificationStatus = 'SUCCESS';
       store.addLog('RECOVERY_PAPER_KEY', 'OK', '12-word emergency backup phrase verified offline. Account access restored.', {
         wordsChecked: 12,
-        serverContacted: false,
+        serverContacted: store.backendOnline,
       }, 'success');
     } else {
       mnemonicVerificationStatus = 'ERROR';

@@ -1,12 +1,30 @@
 <script lang="ts">
   import { store } from '../store.svelte';
+  import { api } from '../api';
   import type { CredentialDevice } from '../types';
 
   let showEnrollModal = $state(false);
   let newDeviceModel = $state('YubiKey Security Key NFC');
   let newDeviceTransport = $state<'usb' | 'nfc' | 'internal' | 'hybrid'>('usb');
 
-  function handleEnrollDevice() {
+  async function handleEnrollDevice() {
+    if (store.backendOnline) {
+      try {
+        const res = await api.enrollDevice({
+          userId: store.user.nationalId,
+          deviceModel: newDeviceModel,
+          transport: newDeviceTransport,
+        });
+        if (res.success && res.device) {
+          store.devices = [res.device, ...store.devices];
+          showEnrollModal = false;
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend enrollment failed, fallback to local:', err);
+      }
+    }
+
     const newId = `cred-${Date.now().toString(36)}`;
     const randomAaguid = `${Math.random().toString(16).substring(2, 10)}-${Math.random().toString(16).substring(2, 6)}-4a81-b6e1-${Math.random().toString(16).substring(2, 14)}`;
     const newCred: CredentialDevice = {
